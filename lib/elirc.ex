@@ -1,18 +1,11 @@
+
 defmodule Elirc do
-  @moduledoc """
-  Documentation for Elirc.
-  """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Elirc.hello
-      :world
-
-  """
-  def hello do
-    :world
+  def start do
+    Elirc.Parser.start_link
+    GenServer.call(Elirc.Parser, {:parse, "test"})
+    IO.puts "Hello World"
   end
+
+  def hello, do: start()
 end
+
