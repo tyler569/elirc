@@ -1,11 +1,16 @@
 
 defmodule Elirc do
-  def start do
-    Elirc.Parser.start_link
-    GenServer.call(Elirc.Parser, {:parse, "test"})
-    IO.puts "Hello World"
+
+  @vsn 0
+
+  def main(_) do
+    start()
   end
 
-  def hello, do: start()
+  def start do
+    # TODO: parameters / support for multiple
+    Elirc.Client.start_link     
+  end
+
 end
 
