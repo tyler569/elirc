@@ -24,6 +24,7 @@ defmodule Elirc.Client do
 
     {:ok, perms} = Permission.start_link(%{
       "mc:tyler569" => [:admin],
+      "mc:LordDecapo" => [:admin],
       "tyler" => [:admin]
     })
 
@@ -82,7 +83,7 @@ defmodule Elirc.Client do
 
   defp handle_command(["~echo", msg], name, perms) do
     if Permission.test(perms, name, [:echo, :admin]) do
-      {:privmsg, "#openredstone", msg}
+      {:privmsg, "#openredstone", String.replace(msg, "/", "./")}
     else
       {:error, :no_permission}
     end
@@ -96,6 +97,56 @@ defmodule Elirc.Client do
     end
   end
 
+  defp handle_command(["~auth", params], name, perms) do
+    if Permission.test(perms, name, :admin) do
+      try do
+        [to, perm] = String.split(params)
+        Permission.push(perms, to, String.to_existing_atom(perm))
+        {:privmsg, "#openredstone", "#{to} authorized for #{perm}"}
+      rescue
+        MatchError -> {:error, :bad_format}
+        ArgumentError -> {:error, :no_such_permission}
+      end
+    else
+      {:error, :no_permission}
+    end
+  end
+
+  defp handle_command(["~deauth", params], name, perms) do
+    if Permission.test(perms, name, :admin) do
+      try do
+        [to, perm] = String.split(params)
+        Permission.pop(perms, to, String.to_existing_atom(perm))
+        {:privmsg, "#openredstone", "#{to} deauthorized for #{perm}"}
+      rescue
+        MatchError -> {:error, :bad_format}
+        ArgumentError -> {:error, :no_such_permission}
+      end
+    else
+      {:error, :no_permission}
+    end
+  end
+
+  defp handle_command(["~perms" | params], name, perms) do
+    if Permission.test(perms, name, [:admin, :perms]) do
+      if params == [] do
+        {:privmsg, "#openredstone", inspect(Permission.dump(perms))}
+      else
+        {:privmsg, "#openredstone", inspect(Map.get(Permission.dump(perms), hd params))}
+      end
+    else
+      {:error, :no_permission}
+    end
+  end
+
+  defp handle_command(["~tryign" | _], name, perms) do
+    if Permission.test(perms, name, [:tryign, :admin]) do
+      {:privmsg, "#openredstone", "Try IGN!"}
+    else
+      {:error, :no_permission}
+    end
+  end
+
   defp handle_command(_, _, _) do
     {:error, :no_such_command}
   end
@@ -103,7 +154,7 @@ defmodule Elirc.Client do
   defp filter_error(line, err_msg) do
     case line do
       {:error, message} ->
-        IO.puts(err_msg <> ": " <> to_string(message))
+        IO.puts("!! " <> err_msg <> ": " <> to_string(message))
         false
       {:noerror, _} -> false
       _ -> true
@@ -139,7 +190,7 @@ defmodule Elirc.Client do
   end
 
   def handle_info({:tcp_closed, _pid}, _state) do
-    IO.puts "Our socket was closed, I must now fall over"
+    IO.puts "!! Our socket was closed, I must now fall over"
     {:stop, :normal, %{}}
   end
 end
