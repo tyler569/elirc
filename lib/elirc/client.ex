@@ -35,16 +35,6 @@ defmodule Elirc.Client do
     }}
   end
 
-  # == Server Callbacks and Utilities ==
-  
-  defp append_newline(string) do
-    if String.ends_with?(string, "\r\n") do
-      string
-    else
-      string <> "\r\n"
-    end
-  end
-
   defp line_action(%{cmd: :ping, trail: t}, _) do
     {:pong, t}
   end
@@ -161,12 +151,6 @@ defmodule Elirc.Client do
     end
   end
   
-  def handle_call({:send, text}, _caller, state) do
-    :gen_tcp.send(state.sock, text |> append_newline)
-
-    {:reply, :ok, state}
-  end
-
   # Handles incoming lines from socket
   def handle_info({:tcp, _pid, data}, state) do
 
