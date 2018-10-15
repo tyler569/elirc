@@ -15,7 +15,7 @@ defmodule Elirc.Client do
   end
 
   def init(_state) do
-    {:ok, sock} = :gen_tcp.connect('irc.openredstone.org', 6667, [:binary])
+    {:ok, sock} = :gen_tcp.connect('irc.esper.net', 6667, [:binary])
 
     [{:user, "tbot", "Elixir tbot"},
      {:nick, "tbot"}] 
@@ -41,7 +41,7 @@ defmodule Elirc.Client do
 
   defp line_action(%{cmd: :auth}, _) do
     [{:join, "#openredstone"},
-     {:privmsg, "NickServ", "identify orepassword"}]
+     {:privmsg, "NickServ", "identify xxxx"}]
   end
 
   defp line_action(%{cmd: :privmsg, trail: t, from: f}, perms) do
